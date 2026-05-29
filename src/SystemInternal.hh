@@ -124,6 +124,9 @@ namespace gz
       /// system during the `Configure` call.
       public: Entity parentEntity = {kNullEntity};
 
+      /// \brief Entity representing this system plugin in the ECM.
+      public: Entity pluginEntity = {kNullEntity};
+
       /// \brief Cached filename of the plugin used when system was loaded.
       /// Used for reloading a system at runtime.
       public: std::string fname = "";

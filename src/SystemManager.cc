@@ -24,6 +24,9 @@
 #include <gz/common/StringUtils.hh>
 
 #include "SystemInternal.hh"
+#include "gz/sim/components/Name.hh"
+#include "gz/sim/components/plugin.hh"
+#include "gz/sim/components/ParentEntity.hh"
 #include "gz/sim/components/SystemPluginInfo.hh"
 #include "gz/sim/Conversions.hh"
 #include "gz/sim/System.hh"
@@ -273,6 +276,10 @@ void SystemManager::AddSystemImpl(
     {
       systemInfoMsg = systemInfoComp->Data();
     }
+
+    _system.pluginEntity = this->CreatePluginEntity(*this->entityCompMgr,
+        _system.parentEntity, _system, _sdf);
+
     if (_sdf)
     {
       auto pluginMsg = systemInfoMsg.add_plugins();
@@ -306,6 +313,36 @@ void SystemManager::AddSystemImpl(
   // Update callbacks will be handled later, add to queue
   std::lock_guard<std::mutex> lock(this->pendingSystemsMutex);
   this->pendingSystems.push_back(_system);
+}
+
+//////////////////////////////////////////////////
+Entity SystemManager::CreatePluginEntity(EntityComponentManager &_ecm,
+    const Entity _parentEntity,
+    const SystemInternal &_system,
+    const std::shared_ptr<const sdf::Element> &_sdf)
+{
+  if (!_sdf || _parentEntity == kNullEntity)
+    return kNullEntity;
+
+  std::string pluginName = _system.name;
+  if (pluginName.empty())
+    pluginName = "system_plugin";
+
+  Entity pluginEntity = _ecm.CreateEntity();
+
+  _ecm.CreateComponent(pluginEntity, components::Plugin());
+  _ecm.CreateComponent(pluginEntity, components::Name(pluginName));
+  _ecm.SetParentEntity(pluginEntity, _parentEntity);
+
+  msgs::Plugin_V pluginInfoMsg;
+  auto pluginMsg = pluginInfoMsg.add_plugins();
+  pluginMsg->CopyFrom(convert<msgs::Plugin>(*_sdf.get()));
+
+  _ecm.SetComponentData<components::SystemPluginInfo>(
+      pluginEntity, pluginInfoMsg);
+  _ecm.SetChanged(pluginEntity, components::SystemPluginInfo::typeId);
+
+  return pluginEntity;
 }
 
 //////////////////////////////////////////////////

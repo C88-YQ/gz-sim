@@ -178,6 +178,24 @@ namespace gz
       private: void AddSystemImpl(SystemInternal _system,
                                   const sdf::Plugin &_sdf);
 
+      /// \brief The created entity is attached to the given parent entity and
+      /// stores plugin information in a SystemPluginInfo component. This allows
+      /// system plugins to be represented in the entity hierarchy and queried
+      /// through the EntityComponentManager.
+      /// \param[in,out] _ecm Entity component manager used to create the entity
+      /// and its components.
+      /// \param[in] _parentEntity Parent entity that the plugin entity will be
+      /// attached to.
+      /// \param[in] _system Generic representation of a system.
+      /// \param[in] _sdf SDF element describing the plugin.
+      /// \return The created plugin entity, or kNullEntity if the parent entity
+      /// is invalid or the SDF element is null.
+      private: Entity CreatePluginEntity(
+          EntityComponentManager &_ecm,
+          const Entity _parentEntity,
+          const SystemInternal &_system,
+          const std::shared_ptr<const sdf::Element> &_sdf);
+                 
       /// \brief Callback for entity add system service.
       /// \param[in] _req Request message containing the entity id and plugins
       /// to add to that entity

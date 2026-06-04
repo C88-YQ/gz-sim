@@ -75,11 +75,14 @@
 #include "gz/sim/components/Pose.hh"
 #include "gz/sim/components/PoseCmd.hh"
 #include "gz/sim/components/PhysicsCmd.hh"
+#include "gz/sim/components/plugin.hh"
 #include "gz/sim/components/SphericalCoordinates.hh"
+#include "gz/sim/components/SystemPluginInfo.hh"
 #include "gz/sim/components/Visual.hh"
 #include "gz/sim/components/World.hh"
 #include "gz/sim/Conversions.hh"
 #include "gz/sim/EntityComponentManager.hh"
+#include "gz/sim/Events.hh"
 #include "gz/sim/Model.hh"
 #include "gz/sim/SdfEntityCreator.hh"
 #include "gz/sim/System.hh"
@@ -115,6 +118,9 @@ class UserCommandsInterface
 
   /// \brief World entity.
   public: Entity worldEntity{kNullEntity};
+
+  /// \brief Event manager used to load plugins for cloned entities.
+  public: EventManager *eventManager{nullptr};
 
   /// \brief Check if there's a contact sensor connected to a collision
   /// component
@@ -589,6 +595,7 @@ void UserCommands::Configure(const Entity &_entity,
   this->dataPtr->iface = std::make_shared<UserCommandsInterface>();
   this->dataPtr->iface->worldEntity = _entity;
   this->dataPtr->iface->ecm = &_ecm;
+  this->dataPtr->iface->eventManager = &_eventManager;
   this->dataPtr->iface->creator =
       std::make_unique<SdfEntityCreator>(_ecm, _eventManager);
 
@@ -918,6 +925,30 @@ bool CreateCommand::CreateFromMsg(const msgs::EntityFactory &_createMsg)
         auto pose = sim::convert<math::Pose3d>(_createMsg.pose());
         this->iface->ecm->SetComponentData<components::Pose>(clonedEntity,
             pose);
+      }
+
+      if (this->iface->eventManager)
+      {
+        std::vector<Entity> entitiesToCheck{clonedEntity};
+        for (size_t i = 0; i < entitiesToCheck.size(); ++i)
+        {
+          auto entity = entitiesToCheck[i];
+          auto children = this->iface->ecm->EntitiesByComponents(
+              components::ParentEntity(entity));
+          entitiesToCheck.insert(entitiesToCheck.end(), children.begin(),
+              children.end());
+
+          if (this->iface->ecm->Component<components::Plugin>(entity))
+            continue;
+
+          auto pluginInfo =
+              this->iface->ecm->Component<components::SystemPluginInfo>(entity);
+          if (!pluginInfo || pluginInfo->Data().plugins().empty())
+            continue;
+
+          this->iface->eventManager->Emit<events::LoadSdfPlugins>(entity,
+              convert<sdf::Plugins>(pluginInfo->Data()));
+        }
       }
       return true;
     }

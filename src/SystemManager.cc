@@ -26,6 +26,7 @@
 #include "SystemInternal.hh"
 #include "gz/sim/components/Name.hh"
 #include "gz/sim/components/plugin.hh"
+#include "gz/sim/components/SdfPointer.hh"
 #include "gz/sim/components/ParentEntity.hh"
 #include "gz/sim/components/SystemPluginInfo.hh"
 #include "gz/sim/Conversions.hh"
@@ -333,6 +334,15 @@ Entity SystemManager::CreatePluginEntity(EntityComponentManager &_ecm,
   _ecm.CreateComponent(pluginEntity, components::Plugin());
   _ecm.CreateComponent(pluginEntity, components::Name(pluginName));
   _ecm.SetParentEntity(pluginEntity, _parentEntity);
+  if (entityFromSdfPointer(_sdf.get(), _ecm) != kNullEntity)
+  {
+    gzerr << "The SDF pointer of the plugin [" << pluginName
+          << "] is not unique. The plugin will not be added. \n";
+  }
+  else
+  {
+    _ecm.CreateComponent(pluginEntity, components::SdfPointer(_sdf.get()));
+  }
 
   msgs::Plugin_V pluginInfoMsg;
   auto pluginMsg = pluginInfoMsg.add_plugins();

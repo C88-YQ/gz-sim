@@ -311,6 +311,17 @@ namespace gz
     Entity GZ_SIM_VISIBLE entityFromMsg(
       const EntityComponentManager &_ecm, const msgs::Entity &_msg);
 
+    /// \brief Get the entity with an SdfPointer component matching the given
+    /// SDF element pointer.
+    /// \param[in] _sdf SDF element pointer to find.
+    /// \param[in] _ecm Entity component manager
+    /// \param[in] _entity Optional entity used to limit the search to that
+    /// entity and its descendants. Leave as kNullEntity to scan all entities.
+    /// \return Entity with the matching SdfPointer component, or kNullEntity
+    /// if there isn't one.
+    Entity GZ_SIM_VISIBLE entityFromSdfPointer(const sdf::Element *_sdf,
+        const EntityComponentManager &_ecm, Entity _entity = kNullEntity);
+
     /// \brief Get the spherical coordinates for an entity.
     /// \param[in] _entity Entity whose coordinates we want.
     /// \param[in] _ecm Entity component manager

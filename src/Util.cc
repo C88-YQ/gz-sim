@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <string>
 #include <string_view>
+#include <unordered_set>
 #include <vector>
 
 #include <gz/msgs/entity.pb.h>
@@ -53,6 +54,7 @@
 #include "gz/sim/components/Projector.hh"
 #include "gz/sim/components/Pose.hh"
 #include "gz/sim/components/Sensor.hh"
+#include "gz/sim/components/SdfPointer.hh"
 #include "gz/sim/components/SphericalCoordinates.hh"
 #include "gz/sim/components/Visual.hh"
 #include "gz/sim/components/World.hh"
@@ -728,6 +730,45 @@ Entity entityFromMsg(const EntityComponentManager &_ecm,
     }
   }
   return kNullEntity;
+}
+
+
+//////////////////////////////////////////////////
+Entity entityFromSdfPointer(const sdf::Element *_sdf,
+    const EntityComponentManager &_ecm, Entity _entity)
+{
+  if (_sdf == nullptr)
+    return kNullEntity;
+
+  std::unordered_set<Entity> descendants;
+  if (_entity != kNullEntity)
+  {
+    descendants = _ecm.Descendants(_entity);
+    if (descendants.empty())
+      return kNullEntity;
+  }
+
+  Entity result{kNullEntity};
+  _ecm.Each<components::SdfPointer>(
+      [&](const Entity &_candidate,
+          const components::SdfPointer *_sdfPointer) -> bool
+      {
+        if (_entity != kNullEntity &&
+            descendants.find(_candidate) == descendants.end())
+        {
+          return true;
+        }
+
+        if (_sdfPointer != nullptr && _sdfPointer->Data() == _sdf)
+        {
+          result = _candidate;
+          return false;
+        }
+
+        return true;
+      });
+
+  return result;
 }
 
 //////////////////////////////////////////////////

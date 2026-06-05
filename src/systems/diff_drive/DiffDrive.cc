@@ -87,6 +87,9 @@ class gz::sim::systems::DiffDrivePrivate
   /// \brief Gazebo communication node.
   public: transport::Node node;
 
+  /// \brief Entity of the plugin
+  public: Entity pluginEntity{kNullEntity};
+
   /// \brief Entity of the left joint
   public: std::vector<Entity> leftJoints;
 
@@ -172,6 +175,7 @@ void DiffDrive::Configure(const Entity &_entity,
     EntityComponentManager &_ecm,
     EventManager &/*_eventMgr*/)
 {
+  this->dataPtr->pluginEntity = entityFromSdfPointer(_sdf.get(), _ecm, _entity);
   this->dataPtr->model = Model(_entity);
 
   // Get the canonical link

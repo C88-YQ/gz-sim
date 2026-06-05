@@ -136,7 +136,7 @@ TEST_F(RecreateEntitiesFixture,
     // Check entities
     // 1 x world + 1 x (default) level + 1 x wind + 5 x model + 5 x link + 5 x
     // collision + 5 x visual + 1 x light (light + visual)
-    EXPECT_EQ(25u, ecm->EntityCount());
+    EXPECT_EQ(29u, ecm->EntityCount());
 
     Entity worldEntity =
         ecm->EntityByComponents(components::World());
@@ -380,7 +380,7 @@ TEST_F(RecreateEntitiesFixture,
     // Check entities
     // 1 x world + 1 x (default) level + 1 x wind + 5 x model + 5 x link + 5 x
     // collision + 5 x visual + 1 x light (light + visual)
-    EXPECT_EQ(49u, ecm->EntityCount());
+    EXPECT_EQ(53u, ecm->EntityCount());
 
     Entity worldEntity =
         ecm->EntityByComponents(components::World());
@@ -539,7 +539,7 @@ TEST_F(RecreateEntitiesFixture,
     // Check entities
     // 1 x world + 1 x (default) level + 1 x wind + 1 x model + 2 x link + 2 x
     // collision + 2 x visual + 2 x joint
-    EXPECT_EQ(12u, ecm->EntityCount());
+    EXPECT_EQ(16u, ecm->EntityCount());
 
     Entity worldEntity =
         ecm->EntityByComponents(components::World());

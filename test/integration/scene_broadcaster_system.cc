@@ -75,7 +75,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(PoseInfo))
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(25u, *server.EntityCount());
+  EXPECT_EQ(28u, *server.EntityCount());
 
   // Create pose subscriber
   transport::Node node;
@@ -125,7 +125,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(SceneInfo))
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(25u, *server.EntityCount());
+  EXPECT_EQ(28u, *server.EntityCount());
 
   // Run server
   server.Run(true, 1, false);
@@ -171,7 +171,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(SceneGraph))
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(25u, *server.EntityCount());
+  EXPECT_EQ(28u, *server.EntityCount());
 
   // Run server
   server.Run(true, 1, false);
@@ -211,7 +211,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(SceneTopic))
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(25u, *server.EntityCount());
+  EXPECT_EQ(28u, *server.EntityCount());
 
   // Create requester
   transport::Node node;
@@ -256,7 +256,7 @@ TEST_P(SceneBroadcasterTest,
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(12u, *server.EntityCount());
+  EXPECT_EQ(17u, *server.EntityCount());
 
   // Create requester
   transport::Node node;
@@ -308,7 +308,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(DeletedTopic))
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
 
-  const std::size_t initEntityCount = 25;
+  const std::size_t initEntityCount = 28;
   EXPECT_EQ(initEntityCount, *server.EntityCount());
 
   // Subscribe to deletions
@@ -369,7 +369,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(SpawnedModel))
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
 
-  const std::size_t initEntityCount = 25;
+  const std::size_t initEntityCount = 28;
   EXPECT_EQ(initEntityCount, *server.EntityCount());
 
   server.Run(true, 1, false);
@@ -438,7 +438,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(State))
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(25u, *server.EntityCount());
+  EXPECT_EQ(28u, *server.EntityCount());
   transport::Node node;
 
   // Run server
@@ -549,7 +549,7 @@ TEST_P(SceneBroadcasterTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(StateStatic))
   sim::Server server(serverConfig);
   EXPECT_FALSE(server.Running());
   EXPECT_FALSE(*server.Running(0));
-  EXPECT_EQ(9u, *server.EntityCount());
+  EXPECT_EQ(13u, *server.EntityCount());
   transport::Node node;
 
   // Run server

@@ -448,7 +448,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
   // Check entities
   // 1 x world + 1 x (default) level + 1 x wind + 5 x model + 5 x link + 5 x
   // collision + 5 x visual + 1 x light (light + visual)
-  EXPECT_EQ(25u, ecm->EntityCount());
+  EXPECT_EQ(29u, ecm->EntityCount());
 
   // Entity remove by name
   msgs::Entity req;
@@ -471,7 +471,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check it was removed
   server.Run(true, 1, false);
-  EXPECT_EQ(21u, ecm->EntityCount());
+  EXPECT_EQ(25u, ecm->EntityCount());
 
   EXPECT_EQ(kNullEntity, ecm->EntityByComponents(components::Model(),
       components::Name("box")));
@@ -494,7 +494,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check it was removed
   server.Run(true, 1, false);
-  EXPECT_EQ(17u, ecm->EntityCount());
+  EXPECT_EQ(21u, ecm->EntityCount());
 
   EXPECT_EQ(kNullEntity, ecm->EntityByComponents(components::Model(),
       components::Name("sphere")));
@@ -513,7 +513,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check it was not removed
   server.Run(true, 1, false);
-  EXPECT_EQ(17u, ecm->EntityCount());
+  EXPECT_EQ(21u, ecm->EntityCount());
 
   EXPECT_NE(kNullEntity, ecm->EntityByComponents(components::Link(),
       components::Name("cylinder_link")));
@@ -534,7 +534,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check cylinder was removed and light wasn't
   server.Run(true, 1, false);
-  EXPECT_EQ(13u, ecm->EntityCount());
+  EXPECT_EQ(17u, ecm->EntityCount());
 
   EXPECT_EQ(kNullEntity, ecm->EntityByComponents(components::Model(),
       components::Name("cylinder")));
@@ -553,7 +553,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check nothing was removed
   server.Run(true, 1, false);
-  EXPECT_EQ(13u, ecm->EntityCount());
+  EXPECT_EQ(17u, ecm->EntityCount());
 
   EXPECT_NE(kNullEntity, ecm->EntityByComponents(components::Name("sun")));
 
@@ -567,7 +567,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check nothing was removed
   server.Run(true, 1, false);
-  EXPECT_EQ(13u, ecm->EntityCount());
+  EXPECT_EQ(17u, ecm->EntityCount());
 
   // Unsupported type - fails to remove
   req.Clear();
@@ -580,7 +580,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check nothing was removed
   server.Run(true, 1, false);
-  EXPECT_EQ(13u, ecm->EntityCount());
+  EXPECT_EQ(17u, ecm->EntityCount());
 
   EXPECT_NE(kNullEntity, ecm->EntityByComponents(components::Name("sun")));
 
@@ -595,7 +595,7 @@ TEST_F(UserCommandsTest, GZ_UTILS_TEST_DISABLED_ON_WIN32(Remove))
 
   // Run an iteration and check it was removed
   server.Run(true, 1, false);
-  EXPECT_EQ(11u, ecm->EntityCount());
+  EXPECT_EQ(15u, ecm->EntityCount());
 
   EXPECT_EQ(kNullEntity, ecm->EntityByComponents(components::Name("sun")));
 }

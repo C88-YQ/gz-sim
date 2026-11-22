@@ -1,6 +1,8 @@
 gz_add_system(buoyancy-engine
   SOURCES
-  BuoyancyEngine.cc
+    BuoyancyEngine.cc
+  TEST_SOURCES
+    BuoyancyEngine_TEST.cc
   PUBLIC_LINK_LIBS
     gz-common::gz-common
     gz-transport::gz-transport

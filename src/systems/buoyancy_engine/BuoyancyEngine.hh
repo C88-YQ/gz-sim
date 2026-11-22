@@ -20,6 +20,7 @@
 #include <gz/sim/System.hh>
 
 #include <memory>
+#include <string>
 
 namespace gz
 {
@@ -41,9 +42,21 @@ namespace systems
   /// ## System Parameters
   /// - `<link_name>`: The link which the plugin is attached to [required,
   ///   string]
-  /// - `<namespace>`: The namespace for the topic. If empty the plugin will
-  ///   listen on `buoyancy_engine` otherwise it listens on
-  ///   `/model/{namespace}/buoyancy_engine` [optional, string]
+  /// - `<topic>`: Custom topic for bladder volume commands. Relative topic
+  ///   names are prefixed with the model namespace, while absolute topic
+  ///   names remain unchanged. Defaults to `buoyancy_engine` without a
+  ///   model namespace, or `{model_namespace}/buoyancy_engine` with one
+  ///   [optional, string].
+  /// - `<status_topic>`: Custom topic for publishing the current bladder
+  ///   volume. Relative topic names are prefixed with the model namespace,
+  ///   while absolute topic names remain unchanged. Defaults to
+  ///   `buoyancy_engine/current_volume` without a model namespace, or
+  ///   `{model_namespace}/buoyancy_engine/current_volume` with one
+  ///   [optional, string].
+  /// - `<namespace>`: Deprecated. Use model namespace instead. The namespace
+  ///   for the topic.If empty the plugin will listen on `buoyancy_engine`
+  ///   otherwise it listens on `/model/{namespace}/buoyancy_engine`
+  ///   [optional, string].
   /// - `<min_volume>`: Minimum volume of the engine [optional, float,
   ///   default=0.00003m^3]
   /// - `<neutral_volume>`: At this volume the engine has neutral buoyancy. Used
@@ -61,12 +74,19 @@ namespace systems
   ///   is. If not defined then there is no surface [optional, float]
   ///
   /// ## Topics
-  /// - Subscribes to a gz::msgs::Double on `buoyancy_engine` or
-  ///   `/model/{namespace}/buoyancy_engine`. This is the set point for the
-  ///   engine.
-  /// - Publishes a gz::msgs::Double on `buoyancy_engine` or
-  ///   `/model/{namespace}/buoyancy_engine/current_volume` on the current
-  ///   volume
+  /// - Subscribes to a gz::msgs::Double on `buoyancy_engine` by default,
+  ///   `{model_namespace}/buoyancy_engine` if a model namespace is defined,
+  ///   or `/model/{namespace}/buoyancy_engine` if only the legacy
+  ///   `<namespace>` is specified. Configurable using `<topic>`. This is
+  ///   the set point for the engine.
+  /// - Publishes a gz::msgs::Double on `buoyancy_engine/current_volume`
+  ///   by default, `{model_namespace}/buoyancy_engine/current_volume` if
+  ///   a model namespace is defined, or
+  ///   `/model/{namespace}/buoyancy_engine/current_volume` if only the
+  ///   legacy `<namespace>` is specified. Configurable using
+  ///   `<status_topic>`. This reports the current bladder volume.
+  /// - The model namespace takes precedence over the deprecated
+  ///   `<namespace>` element when both are specified.
   ///
   /// ## Examples
   /// To get started run:
@@ -96,8 +116,21 @@ namespace systems
     public gz::sim::ISystemConfigure,
     public gz::sim::ISystemPreUpdate
   {
+    /// \brief Resolved topic names
+    public: struct TopicNames
+    {
+      /// \brief Command topic name
+      public: std::string cmdTopic;
+
+      /// \brief Status topic name
+      public: std::string statusTopic;
+    };
+
     /// \brief Constructor
     public: BuoyancyEnginePlugin();
+
+    /// \brief Destructor
+    public: virtual ~BuoyancyEnginePlugin() override;
 
     // Documentation inherited
     public: void Configure(
@@ -111,6 +144,9 @@ namespace systems
     public: void PreUpdate(
         const gz::sim::UpdateInfo &_info,
         gz::sim::EntityComponentManager &_ecm);
+
+    /// \brief Get the resolved topic names
+    public: TopicNames ResolvedTopicNames() const;
 
     /// \brief Private data pointer
     private: std::unique_ptr<BuoyancyEnginePrivateData> dataPtr;

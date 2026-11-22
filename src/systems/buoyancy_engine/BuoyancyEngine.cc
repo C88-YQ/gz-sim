@@ -77,6 +77,9 @@ class gz::sim::systems::BuoyancyEnginePrivateData
   /// \brief Transport node for control
   public: gz::transport::Node node;
 
+  /// \brief Resolved topic names
+  public: BuoyancyEnginePlugin::TopicNames resolvedTopicNames;
+
   /// \brief Publishes bladder status
   public: gz::transport::Node::Publisher statusPub;
 
@@ -121,6 +124,9 @@ BuoyancyEnginePlugin::BuoyancyEnginePlugin()
   : dataPtr(std::make_unique<BuoyancyEnginePrivateData>())
 {
 }
+
+//////////////////////////////////////////////////
+BuoyancyEnginePlugin::~BuoyancyEnginePlugin() = default;
 
 //////////////////////////////////////////////////
 void BuoyancyEnginePlugin::Configure(
@@ -189,28 +195,62 @@ void BuoyancyEnginePlugin::Configure(
     return;
   }
 
-  std::string cmdTopic = "/buoyancy_engine/";
-  std::string statusTopic = "/buoyancy_engine/current_volume";
+  // Generate namespace
+  std::string ns = scopedNamespace(_ecm, _entity);
   if (_sdf->HasElement("namespace"))
   {
-    cmdTopic = gz::transport::TopicUtils::AsValidTopic(
-      "/model/" + _sdf->Get<std::string>("namespace") + "/buoyancy_engine/");
-    statusTopic = gz::transport::TopicUtils::AsValidTopic(
-      "/model/" + _sdf->Get<std::string>("namespace")
-      + "/buoyancy_engine/current_volume");
+    gzwarn << "The <namespace> element is deprecated. Use <topic> or "
+           << "<status_topic> together with the model namespace to configure "
+           << "the desired topic name instead." << std::endl;
+    
+    if (ns.empty())
+    {
+      const std::string nsStr = _sdf->Get<std::string>("namespace");
+      if (!nsStr.empty() && nsStr[0] != '/')
+      {
+        ns = "/model/" + nsStr;
+      }
+      else
+      {
+        ns = "/model" + nsStr;
+      }
+    }
+    else
+    {
+      gzwarn << "The <namespace> element is ignored because the model has a "
+             << "namespace defined." << std::endl;
+    }
   }
 
-  if (!this->dataPtr->node.Subscribe(cmdTopic,
+  // Subscribe to command topic
+  auto &resolvedTopicNames = this->dataPtr->resolvedTopicNames;
+  TopicNameOptions cmdTopicOptions;
+  cmdTopicOptions.sdfElementName = "topic";
+  cmdTopicOptions.topicNamespace = ns;
+  cmdTopicOptions.defaultTopicSuffix = "buoyancy_engine";
+  resolvedTopicNames.cmdTopic = resolvedTopicName(_sdf, cmdTopicOptions);
+
+  if (!this->dataPtr->node.Subscribe(resolvedTopicNames.cmdTopic,
     &BuoyancyEnginePrivateData::OnCmdBuoyancyEngine, this->dataPtr.get()))
   {
-    gzerr << "Failed to subscribe to [" << cmdTopic << "]" << std::endl;
+    gzerr << "Failed to subscribe to [" << resolvedTopicNames.cmdTopic
+          << "]" << std::endl;
   }
 
-  this->dataPtr->statusPub =
-    this->dataPtr->node.Advertise<gz::msgs::Double>(statusTopic);
+  // Publish 
+  TopicNameOptions statusTopicOptions;
+  statusTopicOptions.sdfElementName = "status_topic";
+  statusTopicOptions.topicNamespace = ns;
+  statusTopicOptions.defaultTopicSuffix = "buoyancy_engine/current_volume";
+  resolvedTopicNames.statusTopic = resolvedTopicName(_sdf, statusTopicOptions);
 
-  gzdbg << "Listening to commands on [" << cmdTopic
-         << "], publishing status on [" << statusTopic << "]" <<std::endl;
+  this->dataPtr->statusPub =
+    this->dataPtr->node.Advertise<gz::msgs::Double>(
+      resolvedTopicNames.statusTopic);
+
+  gzdbg << "Listening to commands on [" << resolvedTopicNames.cmdTopic
+         << "], publishing status on [" << resolvedTopicNames.statusTopic
+         << "]" <<std::endl;
 }
 
 //////////////////////////////////////////////////
@@ -272,6 +312,13 @@ void BuoyancyEnginePlugin::PreUpdate(
       - this->dataPtr->fluidDensity * this->dataPtr->neutralVolume);
   }
   link.AddWorldWrench(_ecm, zForce, {0, 0, 0});
+}
+
+//////////////////////////////////////////////////
+BuoyancyEnginePlugin::TopicNames
+  BuoyancyEnginePlugin::ResolvedTopicNames() const
+{
+  return this->dataPtr->resolvedTopicNames;
 }
 
 GZ_ADD_PLUGIN(

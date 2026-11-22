@@ -48,6 +48,47 @@ release will remove the deprecated code.
     base pointer is no longer supported.
 
 * **Deprecations**
+  * **BuoyancyEngine**: The `<namespace>` SDF parameter originally controls the
+    namespace used for topic names. If specified, the plugin subscribes to
+    `/model/{namespace}/buoyancy_engine` and publishes to
+    `/model/{namespace}/buoyancy_engine/current_volume`. Otherwise, the default
+    topics are `buoyancy_engine` and `buoyancy_engine/current_volume`.
+
+    With the new model namespace support, the model namespace takes precedence
+    over `<namespace>` when specified, while preserving the original behavior
+    otherwise.
+
+    The `<namespace>` parameter is now deprecated. Users are encouraged to use
+    the model namespace together with the newly supported `<topic>` and
+    `<status_topic>` parameters instead. Relative topics are prefixed with the
+    model namespace when specified, while absolute topics (starting with `/`)
+    remain unchanged.
+
+    For example, the following configuration:
+
+    ```xml
+    <model name="robot1">
+      <plugin ...>
+        <link_name>base_link</link_name>
+        <namespace>robot1</namespace>
+      </plugin>
+    </model>
+    ```
+
+    Can be replaced with:
+
+    ```xml
+    <model name="robot1" namespace="/model/robot1">
+      <plugin ...>
+        <link_name>base_link</link_name>
+      </plugin>
+    </model>
+    ```
+
+    Both configurations resolve the command topic to
+    `/model/robot1/buoyancy_engine` and the status topic to
+    `/model/robot1/buoyancy_engine/current_volume`.
+
   * **Hydrodynamics**: Added mass via plugin parameters (`<xDotU>`,
     `<yDotV>`, `<zDotW>`, `<kDotP>`, `<mDotQ>`, `<nDotR>`, and all
     cross terms `<*Dot*>`) is deprecated **when using the DART physics
